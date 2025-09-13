@@ -1,9 +1,17 @@
+# Streamlit app
 streamlit==1.26.0
+
+# Image processing
 pillow==10.1.0
 numpy==1.25.0
 opencv-python==4.8.1.78
+
+# OCR
 pytesseract==0.5.3
+
+# Deep learning / BLIP
 torch==2.1.0
 torchvision==0.16.1
 torchaudio==2.1.0
 transformers==4.41.0
+
