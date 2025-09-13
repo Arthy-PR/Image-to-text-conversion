@@ -1,25 +1,26 @@
-import pytesseract
-import cv2
+# Save as app.py
+import streamlit as st
 from PIL import Image
 import numpy as np
-from google.colab import files
-from IPython.display import display
-
-# Optional: for image captioning
+import cv2
+import pytesseract
 from transformers import BlipProcessor, BlipForConditionalGeneration
 import torch
 
-# -------------------------------
-# 1. Upload Image
-# -------------------------------
-uploaded = files.upload()  # User uploads image
+st.set_page_config(page_title="OCR & Image Captioning", layout="centered")
+st.title("📄 OCR & Image Captioning App")
 
-for filename in uploaded.keys():
-    image = Image.open(filename)
-    display(image)  # Display uploaded image
+# -------------------------------
+# Upload Image
+# -------------------------------
+uploaded_file = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
+
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
 
     # -------------------------------
-    # 2. OCR: Extract Text
+    # OCR: Extract Text
     # -------------------------------
     image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     gray = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
@@ -28,17 +29,22 @@ for filename in uploaded.keys():
 
     text = pytesseract.image_to_string(gray)
 
-    print("----- Extracted Text -----")
-    print(text if text.strip() != "" else "No text found in the image.")
+    st.subheader("Extracted Text")
+    if text.strip() != "":
+        st.text(text)
+    else:
+        st.text("No text found in the image.")
 
     # -------------------------------
-    # 3. Optional: Image Captioning
+    # Image Captioning
     # -------------------------------
-    print("\n----- Image Description -----")
+    st.subheader("Image Description")
+
     processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
     model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
 
     inputs = processor(images=image, return_tensors="pt")
     out = model.generate(**inputs)
     description = processor.decode(out[0], skip_special_tokens=True)
-    print(description)
+
+    st.text(description)
